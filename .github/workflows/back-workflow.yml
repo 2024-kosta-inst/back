@@ -1,0 +1,66 @@
+name: BACK-WORKFLOW
+on:
+  push:
+    branches: [ "main" ]
+jobs:
+  back-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          script: |
+            set -e
+            cd back
+            mkdir -p src/main/resources
+            cat <<EOF > src/main/resources/application.yml
+            spring:
+              application:
+                  name: rest_blog
+              jpa:
+                  generate-ddl: true
+                  show-sql: true
+                  open-in-view: false
+              sql:
+                  init:
+                      mode: never
+              upload:
+                  location: /home/image
+              servlet:
+                multipart:
+                  max-file-size: 100MB
+                  max-request-size: 100MB
+            jwt:
+              issuer: ${{ secrets.USERNAME }}
+              secret_key: ${{ secrets.JWT_KEY }}
+              access_duration: 5000 # 1800000  # 30분 (30 * 60 * 1000)
+              refresh_duration: 86400000 # 86400000 # 24시간 (24 * 60 * 60 * 1000)
+            oauth2:
+              clients:
+                  google:
+                      client-id: ${{ secrets.GOOGLE_ID }}
+                      client-secret: ${{ secrets.GOOGLE_KEY }}
+                      redirect-uri: ${{ secrets.GOOGLE_REDIRECT_URI }}
+                      token-uri: https://oauth2.googleapis.com/token
+                      user-info-request-uri: https://www.googleapis.com/oauth2/v3/userinfo
+                  kakao:
+                      client-id: ${{ secrets.KAKAO_ID }}
+                      client-secret: ${{ secrets.KAKAO_KEY }}
+                      redirect-uri: ${{ secrets.KAKAO_REDIRECT_URI }}
+                      token-uri: https://kauth.kakao.com/oauth/token
+                      user-info-request-uri: https://kapi.kakao.com/v2/user/me
+            EOF
+
+            echo -e "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
+            echo -e "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+            echo -e "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> .env
+            echo -e "TZ=${{ secrets.TZ }}" >> .env
+            echo -e "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" >> .env
+            echo -e "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> .env
+
+            git_output=$(sudo git pull origin main 2>&1)
+
+            docker compose up -d --build
