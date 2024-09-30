@@ -77,7 +77,7 @@ public class WebSecurityConfig {
 		http.authorizeHttpRequests(auth ->
 			// 특정 URL 경로에 대해서는 인증 없이 접근 가능
 			auth.requestMatchers(
-				new AntPathRequestMatcher("/img/**"), // 이미지
+				new AntPathRequestMatcher("/api/img/**"), // 이미지
 				new AntPathRequestMatcher("/api/oauth/**"),
 				new AntPathRequestMatcher("/api/auth/signup"), // 회원가입
 				new AntPathRequestMatcher("/api/auth/duplicate"), // 이메일 중복체크
@@ -116,8 +116,8 @@ public class WebSecurityConfig {
 		return request -> {
 			CorsConfiguration config = new CorsConfiguration();
 			config.setAllowedHeaders(Collections.singletonList("*"));
-			config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-			config.setAllowedOrigins(List.of("http://localhost:3000", "http://172.30.1.30:3000", "http://192.168.135.128", "http://192.168.135.128:80"));
+			config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+			config.setAllowedOrigins(List.of("http://3.38.106.135", "http://inkyuinst.store"));
 			config.setAllowCredentials(true);
 			return config;
 		};
