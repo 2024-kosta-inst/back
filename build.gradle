@@ -14,7 +14,7 @@ java {
 }
 
 jar {
-	enable: false
+	enabled: false
 }
 
 configurations {
