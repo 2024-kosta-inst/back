@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.kosta.entity.ImageFile;
 
-
 @Component
 public class FileUtils {
 	
@@ -30,6 +29,12 @@ public class FileUtils {
 			// 새로운 파일명 만들어주기
 			String savedFileName = UUID.randomUUID() + "_" + originalFileName;
 			
+			// 업로드 경로 미존재 시 디렉토리 생성
+			Path directoryPath = Paths.get(uploadPath);
+			if (!Files.exists(directoryPath)) {
+				Files.createDirectories(directoryPath);
+			}
+
 			// 해당 경로에 파일 이미지 업로드
 			InputStream inputStream = file.getInputStream();
 			Path path = Paths.get(uploadPath).resolve(savedFileName);
